@@ -43,7 +43,9 @@ ScamShield focuses on three things:
 
 ## 🎬 Demo
 
-[![Watch Demo](https://img.shields.io/badge/Watch-MVP_Demo-red?style=for-the-badge&logo=youtube&logoColor=white)](docs/ScamShield_MVP_Demo.mp4)
+
+[![Watch Demo](https://img.shields.io/badge/Watch-Project_Demo-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/QYnCnlIhPIM)
+
 
 Our working prototype currently runs through MCP Inspector.
 
