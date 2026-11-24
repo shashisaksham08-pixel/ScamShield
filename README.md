@@ -41,10 +41,28 @@ ScamShield focuses on three things:
 
 ---
 
+
 ## 🎬 Demo
 
-
 [![Watch Demo](https://img.shields.io/badge/Watch-Project_Demo-red?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/QYnCnlIhPIM)
+
+---
+
+## 🚀 Minimum Viable Product (MVP)
+
+The current MVP includes:
+
+- MCP Server
+- Fraud Detection Engine
+- Risk Scoring System
+- Scam Signal Registry
+- Golden-Hour Emergency Assistance
+- Fraud Detection Test Cases
+
+[![MVP Source Code](https://img.shields.io/badge/View-MVP_Source_Code-blue?style=for-the-badge&logo=github)](./mcp-server)
+
+**Status:** Initial MVP — Under Active Development.
+
 
 
 Our working prototype currently runs through MCP Inspector.
