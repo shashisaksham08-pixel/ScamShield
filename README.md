@@ -2,7 +2,7 @@
 
 # 🛡️ ScamShield
 
-### Think Before You Pay. Act Before It's Too Late.
+### Think Before You Pay. Act Before It's Too Late!
 
 An MCP-powered toolkit that helps AI assistants detect scams, explain risks and guide victims through the first critical hour after fraud.
 
