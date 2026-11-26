@@ -1,4 +1,4 @@
-
+﻿
 import { McpServer } from "@modelcontextprotocol/server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import process from "node:process";
@@ -22,6 +22,29 @@ function result(data: unknown) {
       },
     ],
   };
+}
+
+function detectMessageSignals(message: string): string[] {
+  const lower = message.toLowerCase();
+
+  const patterns = [
+    ["urgent", /urgent|act immediately|act now/],
+    ["account blocked", /account.{0,30}(blocked|suspended|frozen)/],
+    ["verify your account", /verify your (account|kyc|identity)/],
+    ["click here", /click here|click this link/],
+    ["otp", /share.{0,20}otp|send.{0,20}otp|provide.{0,20}otp/],
+    ["kyc", /\bkyc\b/],
+    ["send money", /send money|transfer money|pay immediately/],
+    ["digital arrest", /digital arrest/],
+    ["prize", /claim.{0,20}prize|won.{0,20}prize/],
+    ["refund scam", /refund.{0,30}(fee|payment|deposit)/],
+    ["bank details request", /share.{0,20}(pin|cvv|password)/],
+    ["legal threat", /arrest warrant|police case|legal action/],
+  ] as const;
+
+  return patterns
+    .filter(([, pattern]) => pattern.test(lower))
+    .map(([label]) => label);
 }
 
 function assessRisk(
@@ -66,20 +89,7 @@ server.registerTool(
     },
   },
   async ({ message }) => {
-    const keywords = [
-      "urgent",
-      "account blocked",
-      "verify your account",
-      "click here",
-      "otp",
-      "kyc",
-      "send money",
-      "digital arrest",
-      "prize",
-    ];
-
-    const lower = message.toLowerCase();
-    const detected = keywords.filter(word => lower.includes(word));
+    const detected = detectMessageSignals(message);
     const assessment = assessRisk(detected, 15);
 
     return result({
@@ -288,15 +298,7 @@ server.registerTool(
     const verdicts: string[] = [];
 
     if (message) {
-      const keywords = [
-        "urgent", "account blocked", "verify your account",
-        "click here", "otp", "kyc", "send money",
-        "digital arrest", "prize",
-      ];
-
-      const detected = keywords.filter(word =>
-        message.toLowerCase().includes(word)
-      );
+      const detected = detectMessageSignals(message);
 
       const assessment = assessRisk(detected, 15);
       checks.message = assessment;
@@ -378,13 +380,34 @@ server.registerTool(
       verdicts.push(assessment.verdict);
     }
 
-    const overallScore = scores.length ? Math.max(...scores) : 0;
+    // Cross-category risk correlation
+const highestScore = scores.length
+  ? Math.max(...scores)
+  : 0;
 
-    const overallVerdict =
-      verdicts.includes("Critical Risk") ? "Critical Risk" :
-      verdicts.includes("High Risk") ? "High Risk" :
-      verdicts.includes("Medium Risk") ? "Medium Risk" :
-      "Low Risk";
+// Count categories with meaningful risk indicators
+const suspiciousCategories = scores.filter(
+  score => score >= 30
+).length;
+
+// Apply a limited corroboration bonus
+const correlationBonus = Math.min(
+  20,
+  Math.max(0, suspiciousCategories - 1) * 10
+);
+
+// Calculate combined risk
+const overallScore = Math.min(
+  100,
+  highestScore + correlationBonus
+);
+
+// Determine final verdict
+const overallVerdict =
+  overallScore >= 80 ? "Critical Risk" :
+  overallScore >= 60 ? "High Risk" :
+  overallScore >= 30 ? "Medium Risk" :
+  "Low Risk";
 
     return result({
       tool: "before_you_pay",
@@ -572,21 +595,7 @@ server.registerTool(
     senderLabel,
     trustedContactName,
   }) => {
-    const keywords = [
-      "urgent",
-      "account blocked",
-      "verify your account",
-      "click here",
-      "otp",
-      "kyc",
-      "send money",
-      "digital arrest",
-      "prize",
-    ];
-
-    const detected = keywords.filter(word =>
-      forwardedMessage.toLowerCase().includes(word)
-    );
+    const detected = detectMessageSignals(forwardedMessage);
 
     const assessment = assessRisk(detected, 15);
 
@@ -701,3 +710,4 @@ main().catch((error: unknown) => {
 
 
 //npm.cmd exec tsc -- --noEmit
+
